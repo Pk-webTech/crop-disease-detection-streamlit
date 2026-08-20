@@ -1,0 +1,15 @@
+disease,fertilizer_name,type,dosage,brand,price_per_litre
+ALS,Mancozeb 75% WP,Fungicide,2.5g per litre of water,Indofil,180
+Angular Leafspot,Copper Oxychloride 50% WP,Fungicide,3g per litre of water,Antracol,200
+Anthracnose Fruit Rot,Carbendazim 50% WP,Fungicide,1g per litre of water,Bavistin,150
+Bean Rust,Hexaconazole 5% EC,Fungicide,2ml per litre of water,Contaf,250
+Blossom Blight,Captan 50% WP,Fungicide,2g per litre of water,Captaf,170
+Gray Mold,Iprodione 50% WP,Fungicide,2.5g per litre of water,Rovral,190
+Leaf Spot,Mancozeb 75% WP,Fungicide,2g per litre of water,Indofil,180
+Powdery Mildew Fruit,Sulphur 80% WP,Fungicide,2g per litre of water,Kumulus,130
+Powdery Mildew Leaf,Penconazole 10% EC,Fungicide,1ml per litre of water,Topas,220
+Nutrient Deficiency,Balanced NPK,Fertilizer,Apply 19:19:19 NPK 5g per litre,Generic,90
+Leaf Mold,Chlorothalonil 75% WP,Fungicide,2g per litre of water,Kavach,160
+Spider Mites,Abamectin 1.8% EC,Insecticide,0.5ml per litre of water,Vertimec,300
+Caterpillars,Emamectin Benzoate 5% SG,Insecticide,0.4g per litre of water,Proclaim,260
+General Pest Control,Neem Oil 3% EC,Bio Pesticide,Apply 2ml per litre of water,Neemax,120
