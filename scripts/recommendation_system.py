@@ -1,18 +1,37 @@
+"""
+Standalone offline script: run YOLOv8 detection on a video and write a
+text report of detected diseases + fertilizer recommendations.
+
+Update SOURCE_VIDEO below to point at the video you want to process.
+"""
+
+from pathlib import Path
+import sys
+
 from ultralytics import YOLO
 import pandas as pd
-import sys
-import os
 
-# Redirect output to text file
-sys.stdout = open(r"C:\Users\piyus\Desktop\result_summary.txt", "w", encoding="utf-8")
+BASE_DIR = Path(__file__).resolve().parent.parent
 
-# 🧩 1️⃣ Load the trained model
-model = YOLO(r"C:\Users\piyus\runs\detect\combined_v4_yolov8s_fixed\weights\best.pt")
+MODEL_PATH = BASE_DIR / "models" / "best.pt"
+CSV_PATH = BASE_DIR / "data" / "fertilizer_database.csv"
+REPORT_PATH = BASE_DIR / "outputs" / "reports" / "result_summary.txt"
 
-# 🧩 2️⃣ Load fertilizer database
-fertilizer_db = pd.read_csv(r"C:\Users\piyus\Desktop\fertilizer_database.csv")
+# Change this to the video you want to analyze
+SOURCE_VIDEO = BASE_DIR / "samples" / "videos" / "sample.mp4"
 
-# 🧩 3️⃣ Create recommendation lookup dictionary
+REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
+
+# Redirect output to a text report
+sys.stdout = open(REPORT_PATH, "w", encoding="utf-8")
+
+# 1) Load the trained model
+model = YOLO(str(MODEL_PATH))
+
+# 2) Load fertilizer database
+fertilizer_db = pd.read_csv(CSV_PATH)
+
+# 3) Build recommendation lookup dictionary
 recommendations = {
     row["disease"]: {
         "fertilizer_name": row["fertilizer_name"],
@@ -23,14 +42,14 @@ recommendations = {
     for _, row in fertilizer_db.iterrows()
 }
 
-# 🧩 4️⃣ Run detection
+# 4) Run detection
 results = model.predict(
-    source=r"C:\Users\piyus\runs\detect\combined_v4_yolov8s_fixed\testimages and video folder\AI_Plant_Disease_Detection_Video_Generation.mp4",  # Change path as needed
+    source=str(SOURCE_VIDEO),
     conf=0.5,
     show=True
 )
 
-# 🧩 5️⃣ Display and save detected results + recommendations
+# 5) Display and save detected results + recommendations
 print("🌾 PEST AND DISEASE DETECTION REPORT 🌾\n")
 print("========================================\n")
 
@@ -47,9 +66,7 @@ for r in results:
             print(f"⚠️ No recommendation found for: {label}\n")
 
 print("========================================")
-print("✅ Report saved successfully at: C:\\Users\\piyus\\Desktop\\result_summary.txt")
+print(f"✅ Report saved successfully at: {REPORT_PATH}")
 
 # Close the file output stream
 sys.stdout.close()
-
-

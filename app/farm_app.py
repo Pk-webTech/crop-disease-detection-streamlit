@@ -74,13 +74,11 @@ show_overlay = st.sidebar.checkbox(
 # ==========================================================
 
 @st.cache_resource
-
 def cached_model():
     return load_model(MODEL_PATH)
 
 
 @st.cache_data
-
 def cached_recommendations():
     return load_recommendations(CSV_PATH)
 
@@ -107,6 +105,19 @@ image_tab, video_tab, chatbot_tab = st.tabs(
     ]
 )
 
+
+# ==========================================================
+# IMAGE TAB
+# ==========================================================
+with image_tab:
+
+    st.header("🖼️ Upload Image")
+
+    uploaded_image = st.file_uploader(
+        "Upload a crop image",
+        type=["jpg", "jpeg", "png"],
+        key="image_uploader"
+    )
 
     if uploaded_image:
 
@@ -204,7 +215,8 @@ image_tab, video_tab, chatbot_tab = st.tabs(
                         st.write(
                             f"Type: {recommendation['type']}"
                         )
-                          st.write(
+
+                        st.write(
                             f"Dosage: {recommendation['dosage']}"
                         )
 
@@ -215,6 +227,8 @@ image_tab, video_tab, chatbot_tab = st.tabs(
                         st.write(
                             f"Estimated Cost: ₹{cost}"
                         )
+                    else:
+                        st.info("No fertilizer recommendation available for this disease.")
 
                     st.markdown("---")
 
@@ -283,7 +297,7 @@ with video_tab:
 
             progress_bar = st.progress(0)
 
-            total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+            total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT)) or 1
 
             current_frame = 0
 
@@ -349,9 +363,11 @@ with chatbot_tab:
 
     if st.button("Get Suggestion"):
 
-        response = chatbot_response(
-            user_query,
-            recommendations
-        )
-
-        st.success(response)
+        if user_query.strip():
+            response = chatbot_response(
+                user_query,
+                recommendations
+            )
+            st.success(response)
+        else:
+            st.warning("Please describe the symptoms first.")

@@ -10,22 +10,33 @@
 #  5. Offline Chatbot for Farmer Guidance
 # ================================================================
 
+from pathlib import Path
+from datetime import datetime
+import os
+
 from ultralytics import YOLO
 import pandas as pd
 import numpy as np
-from datetime import datetime
 from sklearn.linear_model import LinearRegression
-import os
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+MODEL_PATH = BASE_DIR / "models" / "best.pt"
+CSV_PATH = BASE_DIR / "data" / "fertilizer_database.csv"
+LOG_PATH = BASE_DIR / "data" / "disease_progression_log.csv"
+
+# Update this to the image you want to analyze
+SOURCE_IMAGE = BASE_DIR / "samples" / "images" / "sample.jpg"
 
 # ================================================================
 # Load Trained Model
 # ================================================================
-model = YOLO(r"C:\Users\piyus\runs\detect\combined_v4_yolov8s_fixed\weights\best.pt")
+model = YOLO(str(MODEL_PATH))
 
 # ================================================================
 # Load Fertilizer Database
 # ================================================================
-fertilizer_db = pd.read_csv(r"C:\Users\piyus\Desktop\fertilizer_database.csv")
+fertilizer_db = pd.read_csv(CSV_PATH)
 
 # Convert CSV into a dictionary for quick lookup
 recommendations = {}
@@ -43,7 +54,7 @@ for _, row in fertilizer_db.iterrows():
 # ================================================================
 print("\n🧠 Running YOLOv8 Model for Detection...\n")
 results = model.predict(
-    source=r"C:\Users\piyus\runs\detect\combined_v2_yolov8s_continue\testimages and video folder\Marginal-Leaves-Necrosis.jpg",
+    source=str(SOURCE_IMAGE),
     conf=0.5,
     save=True,
     show=False
@@ -65,18 +76,17 @@ def calculate_severity(result):
 # ================================================================
 def update_progression_log(disease, severity):
     """Append severity data to CSV and train regression for prediction."""
-    log_path = "disease_progression_log.csv"
     entry = pd.DataFrame([{
         "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "disease": disease,
         "severity_percent": severity
     }])
 
-    if os.path.exists(log_path):
-        entry.to_csv(log_path, mode="a", header=False, index=False)
-        data = pd.read_csv(log_path, names=["date", "disease", "severity_percent"])
+    if os.path.exists(LOG_PATH):
+        entry.to_csv(LOG_PATH, mode="a", header=False, index=False)
+        data = pd.read_csv(LOG_PATH, names=["date", "disease", "severity_percent"])
     else:
-        entry.to_csv(log_path, index=False)
+        entry.to_csv(LOG_PATH, index=False)
         data = entry
 
     # Filter specific disease history
@@ -85,9 +95,9 @@ def update_progression_log(disease, severity):
     if len(data) >= 3:
         X = np.arange(len(data)).reshape(-1, 1)
         y = data["severity_percent"].values
-        model = LinearRegression().fit(X, y)
+        regression_model = LinearRegression().fit(X, y)
         future = np.array([[len(data) + i] for i in range(1, 4)])
-        prediction = model.predict(future)
+        prediction = regression_model.predict(future)
         increase = round(prediction[-1] - y[-1], 2)
         print(f"📈 Predicted infection increase for '{disease}': +{increase}% in 3 days.\n")
     else:
@@ -131,10 +141,11 @@ def chatbot_response(user_input):
                     f"Apply {row['fertilizer_name']} ({row['dosage']}) by {row['brand']}.")
     return "Sorry, I don't have information on that symptom."
 
-print("\n🤖 Farmer Chatbot is active! (Type 'exit' to quit)")
-while True:
-    query = input("Farmer: ")
-    if query.lower() in ["exit", "quit"]:
-        print("Chatbot: Goodbye! Stay healthy 🌾")
-        break
-    print("Chatbot:", chatbot_response(query))
+if __name__ == "__main__":
+    print("\n🤖 Farmer Chatbot is active! (Type 'exit' to quit)")
+    while True:
+        query = input("Farmer: ")
+        if query.lower() in ["exit", "quit"]:
+            print("Chatbot: Goodbye! Stay healthy 🌾")
+            break
+        print("Chatbot:", chatbot_response(query))
